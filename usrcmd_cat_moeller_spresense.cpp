@@ -95,14 +95,14 @@ static int usrcmd_info(int argc, char **argv)
         return 0;
     }
     if (ntlibc_strcmp(argv[1], "sys") == 0) {
-        uart_puts("NXP LPC824 Monitor\r\n");
+        uart_puts("Cat moeller(Spresense)\r\n");
         return 0;
     }
     if (ntlibc_strcmp(argv[1], "ver") == 0) {
-        uart_puts("Version 0.0.0\r\n");
+        uart_puts("Version 0.0\r\n");
         return 0;
     }
-    uart_puts("Unknown sub command found\r\n");
+    uart_puts("Unknown sub command found.\r\n");
     return -1;
 }
 
