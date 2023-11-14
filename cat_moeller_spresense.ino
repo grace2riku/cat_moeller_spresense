@@ -1,8 +1,8 @@
-#include "ntshell.h"
+#include "src/ntshell/ntshell.h"
 extern "C" {
-#include "ntshell_spresense_arduino.h"
+#include "src/ntshell/ntshell_spresense_arduino.h"
 }
-#include "usrcmd_cat_moeller_spresense.h"
+#include "src/ntshell/usrcmd_cat_moeller_spresense.h"
 
 #define PROMPT_STR ">"
 
@@ -17,7 +17,7 @@ static int func_read(char* buf, int cnt, void* extobj) {
 }
 
 static int func_write(const char* buf, int cnt, void* extobj) {
-  return Serial.write(buf, cnt);
+  return Serial.write((uint8_t*)buf, cnt);
 }
 
 static int func_callback(const char* text, void* extobj) {
