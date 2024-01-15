@@ -30,8 +30,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "ntopt.h"
-#include "ntlibc.h"
+#include "src/ntshell/ntopt.h"
+#include "src/ntshell/ntlibc.h"
 
 #include <Arduino.h>
 #define uart_puts Serial.print
