@@ -1,3 +1,9 @@
+#ifndef SUBCORE
+#error "Core selection is wrong!!"
+#endif
+
+#include <MP.h>
+
 #include "src/ntshell/ntshell.h"
 extern "C" {
 #include "src/ntshell/ntshell_spresense_arduino.h"
@@ -26,6 +32,9 @@ static int func_callback(const char* text, void* extobj) {
 
 void setup() {
   // put your setup code here, to run once:
+  MP.begin();
+  MP.EnableConsole();
+  
   Serial.begin(115200);
   while (!Serial) {
     ;;
