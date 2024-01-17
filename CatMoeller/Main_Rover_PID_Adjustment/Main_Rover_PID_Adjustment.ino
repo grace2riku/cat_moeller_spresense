@@ -222,8 +222,8 @@ void loop() {
   MPLog("R_duty: %d, L_duty: %d\n", R_duty, L_duty);
   td.R_duty = R_duty;
   td.L_duty = L_duty;
-  int8_t snd_id = 101;
-  MP.Send(snd_id, &td, subcore);
+//  int8_t snd_id = 101;
+//  MP.Send(snd_id, &td, subcore);
   
   if (R_Vm == 0.0 && VRt != 0.0) {
     // Torque Compensation

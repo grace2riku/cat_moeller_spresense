@@ -34,6 +34,7 @@
 #include "src/ntshell/ntlibc.h"
 
 #include <Arduino.h>
+#include <MP.h>
 #define uart_puts Serial.print
 
 typedef int (*USRCMDFUNC)(int argc, char **argv);
@@ -42,6 +43,7 @@ static int usrcmd_ntopt_callback(int argc, char **argv, void *extobj);
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
 static int usrcmd_mainboard_leds(int argc, char **argv);
+static int usrcmd_drive(int argc, char **argv);
 
 typedef struct {
     char *cmd;
@@ -53,12 +55,14 @@ static const cmd_table_t cmdlist[] = {
     { "help", "This is a description text string for help command.", usrcmd_help },
     { "info", "This is a description text string for info command.", usrcmd_info },
     { "led",  "led [led no = 0..3] [led turn on = on or off]\r\nex) led 0 on", usrcmd_mainboard_leds },
+    { "drive",  "drive R_Kp R_Ki R_Kd L_Kp L_Ki L_Kd Speed(m/s) Rot\r\nex) drive 200 30 5 200 30 5 0.5 0", usrcmd_drive },
 };
 
 enum {
   COMMAND_HELP,
   COMMAND_INFO,
   COMMAND_LED,
+  COMMAND_DRIVE,
   COMMAND_MAX
 };
 
@@ -153,6 +157,43 @@ static int usrcmd_mainboard_leds(int argc, char **argv)
     level = HIGH;    
   }
   digitalWrite(leds_list[led], level);
+
+  return 0;
+}
+
+struct pid_data {
+  float rKp;
+  float rKi;
+  float rKd;
+  float lKp;
+  float lKi;
+  float lKd;
+  float vt;
+  float rot;
+};
+struct pid_data pid;
+
+static int usrcmd_drive(int argc, char **argv) {
+  char param_str[128];
+
+  if (argc != 9) {
+    print_cmd_description(&cmdlist[COMMAND_DRIVE]);
+    return -1;
+  }
+
+  float params[9]; 
+  float* param = (float*)&pid; 
+
+  for (int i = 1; i < 9; i++, param++) {
+    params[i] = atof(argv[i]);
+    *param = params[i];
+  }
+
+  sprintf(param_str, "R_Kp = %.2f, R_Ki = %.2f, R_Kd = %.2f, L_Kp = %.2f, L_Ki = %.2f, L_Kd = %.2f, Speed(m/s) = %.2f, Rot = %.2f\r\n", \
+    pid.rKp, pid.rKi, pid.rKd, pid.lKp, pid.lKi, pid.lKd, pid.vt, pid.rot);
+  uart_puts(param_str);
+
+  MP.Send(100, &pid);
 
   return 0;
 }
