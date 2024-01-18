@@ -9,6 +9,7 @@ extern "C" {
 #include "src/ntshell/ntshell_spresense_arduino.h"
 }
 #include "src/ntshell/usrcmd_cat_moeller_spresense.h"
+#include "RandomParameterCreater.h"
 
 #define PROMPT_STR ">"
 
@@ -32,6 +33,8 @@ static int func_callback(const char* text, void* extobj) {
 
 void setup() {
   // put your setup code here, to run once:
+  random_parameter_initialize();
+
   MP.begin();
   MP.EnableConsole();
   

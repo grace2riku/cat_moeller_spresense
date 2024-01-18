@@ -37,6 +37,8 @@
 #include <MP.h>
 #define uart_puts Serial.print
 
+#include "RandomParameterCreater.h"
+
 typedef int (*USRCMDFUNC)(int argc, char **argv);
 
 static int usrcmd_ntopt_callback(int argc, char **argv, void *extobj);
@@ -44,6 +46,8 @@ static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
 static int usrcmd_mainboard_leds(int argc, char **argv);
 static int usrcmd_drive(int argc, char **argv);
+static int usrcmd_random_create(int argc, char **argv);
+static int usrcmd_drive_random_param(int argc, char **argv);
 
 typedef struct {
     char *cmd;
@@ -56,6 +60,8 @@ static const cmd_table_t cmdlist[] = {
     { "info", "This is a description text string for info command.", usrcmd_info },
     { "led",  "led [led no = 0..3] [led turn on = on or off]\r\nex) led 0 on", usrcmd_mainboard_leds },
     { "drive",  "drive R_Kp R_Ki R_Kd L_Kp L_Ki L_Kd Speed(m/s) Rot\r\nex) drive 200 30 5 200 30 5 0.5 0", usrcmd_drive },
+    { "random_create",  "Generate random numbers for Speed(m/s) and Rot.", usrcmd_random_create },
+    { "drive_random_param",  "Generate random numbers of Speed (m/s) and Rot to drive the cat moeller.", usrcmd_drive_random_param },
 };
 
 enum {
@@ -63,6 +69,7 @@ enum {
   COMMAND_INFO,
   COMMAND_LED,
   COMMAND_DRIVE,
+  COMMAND_RANDOM_CREATE,
   COMMAND_MAX
 };
 
@@ -171,10 +178,10 @@ struct pid_data {
   float vt;
   float rot;
 };
-struct pid_data pid;
 
 static int usrcmd_drive(int argc, char **argv) {
   char param_str[128];
+  struct pid_data pid;
 
   if (argc != 9) {
     print_cmd_description(&cmdlist[COMMAND_DRIVE]);
@@ -191,6 +198,41 @@ static int usrcmd_drive(int argc, char **argv) {
 
   sprintf(param_str, "R_Kp = %.2f, R_Ki = %.2f, R_Kd = %.2f, L_Kp = %.2f, L_Ki = %.2f, L_Kd = %.2f, Speed(m/s) = %.2f, Rot = %.2f\r\n", \
     pid.rKp, pid.rKi, pid.rKd, pid.lKp, pid.lKi, pid.lKd, pid.vt, pid.rot);
+  uart_puts(param_str);
+
+  MP.Send(100, &pid);
+
+  return 0;
+}
+
+static int usrcmd_random_create(int argc, char **argv) {
+  char param_str[64];
+  struct random_parameter val;
+
+  val = random_parameter_create();
+
+  sprintf(param_str, "Random numbers Speed(m/s) = %.2f, Rot = %d\r\n", val.vt, val.rot);
+  uart_puts(param_str);
+
+  return 0;
+}
+
+static int usrcmd_drive_random_param(int argc, char **argv) {
+  char param_str[64];
+  struct random_parameter val;
+  struct pid_data pid;
+
+  val = random_parameter_create();
+  pid.vt = val.vt;
+  pid.rot = val.rot;
+
+  // PIDパラメータは以下を参考に設定した
+  // https://github.com/TE-YoshinoriOota/Spresense-microROS-Seminar/blob/main/Sketches/SprTurtleBot/Sub_Rover_Control/Sub_Rover_Control.ino
+  pid.rKp = pid.lKp = 120;
+  pid.rKi = pid.lKi = 30;
+  pid.rKd = pid.lKd = 3;
+  
+  sprintf(param_str, "Random numbers Speed(m/s) = %.2f, Rot = %d\r\n", val.vt, val.rot);
   uart_puts(param_str);
 
   MP.Send(100, &pid);
