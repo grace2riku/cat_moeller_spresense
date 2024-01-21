@@ -112,6 +112,7 @@ void loop() {
   static float R_err_integ = 0.0;
   static float L_err_integ = 0.0; 
   static const float d = 0.065; /* (the legnth of chassis)/2 (m) */ 
+  int8_t snd_id;
 
   float R_Vm, L_Vm;  // actual speeds calcurated by encorders
 
@@ -137,6 +138,7 @@ void loop() {
     }
     MPLog("param(orig) = %f,%f,%f,%f,%f,%f,%f,%f\n",
       pid->rKp,pid->rKi,pid->rKd,pid->lKp,pid->lKi,pid->rKd,pid->vt, pid->rot); 
+
     MPLog("param(copy) = %f,%f,%f,%f,%f,%f,%f,%f\n",
       R_Kp,R_Ki,R_Kd,L_Kp,L_Ki,L_Kd,VRt,VLt); 
     start_time = millis();
@@ -223,7 +225,8 @@ void loop() {
   td.R_duty = R_duty;
   td.L_duty = L_duty;
 //  int8_t snd_id = 101;
-//  MP.Send(snd_id, &td, subcore);
+  snd_id = 101;
+  MP.Send(snd_id, &td, subcore);
   
   if (R_Vm == 0.0 && VRt != 0.0) {
     // Torque Compensation
